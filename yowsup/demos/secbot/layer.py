@@ -65,8 +65,10 @@ class EchoLayer(YowInterfaceLayer):
             else:
                 help = "Command not found. Try: \n!%s" % ('\n!'.join(cmds))
                 messageProtocolEntity.setBody(help)
-
-
+        
+        else:
+            print("here")
+            pass
 
 
         print("Sending %s to %s" % (messageProtocolEntity.getBody(), messageProtocolEntity.getFrom(False)))
