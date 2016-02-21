@@ -1,4 +1,8 @@
 from yowsup.layers.interface                           import YowInterfaceLayer, ProtocolEntityCallback
+from yowsup.layers.protocol_messages.protocolentities  import TextMessageProtocolEntity
+from yowsup.layers.protocol_receipts.protocolentities  import OutgoingReceiptProtocolEntity
+from yowsup.layers.protocol_acks.protocolentities      import OutgoingAckProtocolEntity
+
 import modules
 import os
 
@@ -36,7 +40,7 @@ class EchoLayer(YowInterfaceLayer):
         elif messageProtocolEntity.getType() == 'media':
             self.onMediaMessage(messageProtocolEntity)
 
-        self.toLower(messageProtocolEntity.forward(messageProtocolEntity.getFrom()))
+        # self.toLower(messageProtocolEntity.forward(messageProtocolEntity.getFrom()))
         self.toLower(messageProtocolEntity.ack())
         self.toLower(messageProtocolEntity.ack(True))
 
@@ -47,8 +51,10 @@ class EchoLayer(YowInterfaceLayer):
     def onTextMessage(self,messageProtocolEntity):
         cmds = possible_commands()
         message = messageProtocolEntity.getBody()
+        receipt = OutgoingReceiptProtocolEntity(messageProtocolEntity.getId(), messageProtocolEntity.getFrom(), 'read', messageProtocolEntity.getParticipant())
 
         if message[0] == "!": 
+           #  self.response(messageProtocolEntity)
             command = message[1:].split(" ")
             if command[0] in cmds:
                 query = ' '.join(command[1:])
@@ -56,23 +62,22 @@ class EchoLayer(YowInterfaceLayer):
                 function = "modules.%s.%s('%s')" % (command[0], command[0], query) 
                 print function
                 try:
-                    a = eval(function)
-                    messageProtocolEntity.setBody(a)
+                    reply  = eval(function)
                 except Exception, e:
-                    messageProtocolEntity.setBody(str(e))
+                    reply = e
                     pass
 
             else:
-                help = "Command not found. Try: \n!%s" % ('\n!'.join(cmds))
-                messageProtocolEntity.setBody(help)
+                reply  = "Command not found. Try: \n!%s" % ('\n!'.join(cmds))
+
+            outgoingMessageProtocolEntity = TextMessageProtocolEntity(reply, to = messageProtocolEntity.getFrom())
+            self.toLower(receipt)
+            self.toLower(outgoingMessageProtocolEntity)
+
+
         
-        else:
-            print("here")
-            pass
-
-
         print("Sending %s to %s" % (messageProtocolEntity.getBody(), messageProtocolEntity.getFrom(False)))
-        
+
 
     def onMediaMessage(self, messageProtocolEntity):
         # just print info

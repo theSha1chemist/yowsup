@@ -6,6 +6,7 @@ def magic8ball(query):
         return h
 
     else:
+        print query 
         answer = ["It is certain",
                 "It is decidedly so",
                 "Without a doubt",
@@ -26,4 +27,4 @@ def magic8ball(query):
                 "My sources say no",
                 "Outlook not so good",
                 "Very doubtful"]
-        return(random.choice(answer))
+        return (random.choice(answer))
